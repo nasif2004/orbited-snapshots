@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OrbitEd Career Snapshot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: core-black single theme with plasma-orange energy; hero orbit → gauges → earnings → jobs → student voice → summary → sources. Sections glide in as you scroll; every meter fills like a ring gauge. */
+:root{
+  --core:#0E0E12; --panel:#16161C; --line:#2A2A33; --ink:#F2F2F5; --muted:#9A9AA6;
+  --plasma:#FF5E00; --plasma-soft:#FF9A4D; --cool:#C8C8D2;
+  --f-display:"Unbounded","Trebuchet MS",system-ui,sans-serif;
+  --f-body:"Figtree","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  --ease:cubic-bezier(.2,.8,.2,1);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--core);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:-20% -10% auto auto;width:60vw;height:60vw;background:radial-gradient(circle,rgba(255,94,0,.10),transparent 60%);pointer-events:none}
+.wrap{position:relative;max-width:960px;margin:0 auto;padding-inline:20px;padding-block:0 56px;display:flex;flex-direction:column;gap:64px}
+h1,h2,h3{margin:0;font-family:var(--f-display);text-wrap:balance;line-height:1.12}
+h2{font-size:clamp(20px,3vw,26px);font-weight:500}
+p{margin:0;max-width:65ch}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--plasma)}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+section{display:flex;flex-direction:column;gap:20px}
+.section-head{display:flex;flex-direction:column;gap:8px}
+.section-head p{color:var(--muted)}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+
+/* scroll-linked reveal: --p runs 0→1 as a section rises into view (1 = fully shown, the resting value) */
+.reveal{--p:1;opacity:calc(.15 + .85*var(--p));transform:translateY(calc((1 - var(--p))*70px)) scale(calc(.95 + .05*var(--p)));filter:blur(calc((1 - var(--p))*5px));transform-origin:50% 0;will-change:transform,opacity}
+.reveal [data-i]{transform:translateY(calc((1 - var(--p))*(30px + var(--i)*28px)));opacity:calc(.2 + .8*var(--p))}
+.reveal .gauge:hover,.reveal .gauge:focus-visible{transform:translateY(-4px)}
+.gauge,.card{transition:border-color .3s ease,box-shadow .3s ease}
+
+/* loader-style progress bar along the top */
+.progress{position:fixed;left:0;right:0;top:0;height:3px;z-index:10;background:rgba(255,94,0,.12);padding-top:env(safe-area-inset-top,0px)}
+.progress i{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,rgba(255,94,0,.4),var(--plasma));box-shadow:0 0 12px rgba(255,94,0,.8)}
+.progress b{position:absolute;top:50%;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:#FFE4D1;box-shadow:0 0 10px 3px rgba(255,94,0,.9);left:0}
+.progress span{position:absolute;right:10px;top:7px;font-family:var(--f-mono);font-size:11px;color:var(--plasma);letter-spacing:.1em;background:rgba(14,14,18,.85);padding:2px 6px;border-radius:6px}
+
+/* hero */
+.hero{position:relative;padding-block:56px 24px}
+.hero canvas{position:absolute;inset:0 -20px;width:calc(100% + 40px);height:100%;pointer-events:none}
+.hero-inner{position:relative;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:32px;align-items:center}
+.hero h1{font-size:clamp(28px,5.2vw,52px);font-weight:700;letter-spacing:-.01em}
+.hero .uni{font-size:18px;color:var(--muted);margin-top:10px}
+.hero .lede{margin-top:20px;font-size:17px}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.tag{font-family:var(--f-mono);font-size:12px;border:1px solid var(--line);border-radius:999px;padding:5px 12px;color:var(--muted)}
+.tag b{color:var(--ink);font-weight:600}
+.headline{border:1px solid rgba(255,94,0,.45);border-radius:20px;padding:24px;background:linear-gradient(160deg,rgba(255,94,0,.16),rgba(22,22,28,.7) 60%);box-shadow:0 0 40px -10px rgba(255,94,0,.35);display:flex;flex-direction:column;gap:6px}
+.headline .big{font-family:var(--f-display);font-size:clamp(44px,7vw,68px);font-weight:700;color:var(--plasma);line-height:1;text-shadow:0 0 24px rgba(255,94,0,.45)}
+.headline .cap{font-weight:500}
+.headline .sub{color:var(--muted);font-size:14px}
+
+/* ring gauges */
+.gauges{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.gauge{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;min-width:0;cursor:pointer}
+.gauge:hover,.gauge:focus-visible{transform:translateY(-4px);border-color:rgba(255,94,0,.6);box-shadow:0 10px 30px -12px rgba(255,94,0,.45);outline:none}
+.gauge svg{width:150px;height:150px;overflow:visible}
+.gauge .track{stroke:var(--line)}
+.gauge .halo{stroke:var(--plasma);stroke-opacity:.35;stroke-dasharray:2 7;transform-origin:75px 75px;animation:spin 40s linear infinite}
+.gauge .arc{stroke-linecap:round;filter:drop-shadow(0 0 7px rgba(255,94,0,.7));transition:stroke-dashoffset 1.6s var(--ease)}
+.gauge .sat-g{transform-origin:75px 75px;transition:transform 1.6s var(--ease)}
+.gauge .sat{fill:#FFE4D1;filter:drop-shadow(0 0 6px rgba(255,94,0,1))}
+.gauge .sat-pulse{fill:none;stroke:var(--plasma);transform-box:fill-box;transform-origin:center;opacity:0}
+.gauge.done .sat-pulse{animation:pulse 2.4s ease-out infinite}
+.gauge .val{font-family:var(--f-display);font-size:30px;font-weight:700;fill:var(--ink)}
+.gauge .label{font-weight:600}
+.gauge .note{font-size:13px;color:var(--muted)}
+.hint{font-family:var(--f-mono);font-size:11px;color:var(--muted);opacity:.7}
+
+/* meters: bar graphs with the ring-gauge effect */
+.meter{cursor:pointer;display:grid;gap:8px;border-radius:10px;padding:6px 8px;margin:-6px -8px;transition:background .3s ease}
+.meter:hover,.meter:focus-visible{background:rgba(255,94,0,.07);outline:none}
+.meter .row{display:flex;justify-content:space-between;gap:12px;font-size:14px}
+.meter .pct{font-family:var(--f-mono);font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink)}
+.meter .track{position:relative;height:10px;border-radius:5px;background:var(--line)}
+.meter .fill{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:linear-gradient(90deg,rgba(255,94,0,.35),var(--plasma));box-shadow:0 0 12px rgba(255,94,0,.55);transition:width 1.6s var(--ease)}
+.meter .sat{position:absolute;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:#FFE4D1;box-shadow:0 0 10px 2px rgba(255,94,0,.95);transition:left 1.6s var(--ease)}
+.meter .sat::after{content:"";position:absolute;inset:-1px;border-radius:50%;border:1.5px solid var(--plasma);opacity:0}
+.meter.done .sat::after{animation:pulse 2.4s ease-out infinite}
+.meter.alt .fill{background:linear-gradient(90deg,rgba(200,200,210,.25),var(--cool));box-shadow:0 0 10px rgba(200,200,210,.35)}
+.meter.alt .sat{box-shadow:0 0 10px 2px rgba(200,200,210,.8)}
+.meter.alt .sat::after{border-color:var(--cool)}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(3.2)}}
+
+/* earnings chart */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.card h3{font-size:16px;font-weight:500}
+.chart-card{overflow-x:auto}
+.legend{display:flex;flex-wrap:wrap;gap:18px;font-size:14px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+.chart svg{width:100%;height:auto;display:block}
+.chart text{font-family:var(--f-mono);font-size:12px}
+.chart .grid{stroke:var(--line)}
+.chart .axis{fill:var(--muted)}
+.chart .pt{transition:transform 1.3s var(--ease),opacity .9s ease}
+.chart .whisker{transition:stroke-dashoffset 1.3s var(--ease)}
+.chart .ring{fill:none;stroke:var(--plasma);transform-box:fill-box;transform-origin:center;opacity:0}
+.chart.done .ring{animation:pulse 2.4s ease-out infinite}
+.chart-note{font-size:13px;color:var(--muted)}
+
+/* jobs + voice */
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.stack{display:flex;height:22px;border-radius:999px;overflow:hidden;background:var(--line)}
+.stack i{display:block;height:100%;transition:width 1.6s var(--ease)}
+.stack i:first-child{box-shadow:0 0 14px rgba(255,94,0,.7)}
+.stack-key{display:grid;gap:6px;font-size:14px}
+.stack-key div{display:flex;justify-content:space-between;gap:12px}
+.meters{display:grid;gap:14px}
+.perc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.perc div{border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:4px;background:var(--panel)}
+.perc b{font-family:var(--f-display);font-size:24px;color:var(--plasma)}
+.perc span{font-size:13px;color:var(--muted)}
+
+/* summary + sources */
+.summary{border-left:3px solid var(--plasma);padding:4px 0 4px 18px;display:grid;gap:12px}
+.summary p{font-size:17px}
+.sources{font-size:13px;color:var(--muted);display:grid;gap:8px;border-top:1px solid var(--line);padding-top:20px}
+.brand{font-family:var(--f-display);font-size:13px;color:var(--plasma);letter-spacing:.04em}
+
+@media (max-width:720px){
+  .hero-inner,.split{grid-template-columns:1fr}
+  .perc{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.reveal,.reveal [data-i]{opacity:1!important;transform:none!important;filter:none!important}}
+</style>
+</head>
+<body>
+<div class="progress" aria-hidden="true"><i id="pbar"></i><b id="pdot"></b><span id="ppct">0%</span></div>
+<div class="wrap">
+  <header class="hero">
+    <canvas id="orbit" aria-hidden="true"></canvas>
+    <div class="hero-inner">
+      <div>
+        <div class="eyebrow">OrbitEd career snapshot · prepared for <span id="who"></span></div>
+        <h1 id="course"></h1>
+        <div class="uni" id="uni"></div>
+        <p class="lede">Where this course leads, using official UK data from Discover Uni.</p>
+        <div class="tags" id="tags"></div>
+      </div>
+      <div class="headline">
+        <div class="eyebrow">15 months after graduating</div>
+        <div class="big mono" id="hl-num"></div>
+        <div class="cap" id="hl-cap"></div>
+        <div class="sub" id="hl-sub"></div>
+      </div>
+    </div>
+  </header>
+
+  <section class="reveal" data-anim="gauges" aria-labelledby="g-h">
+    <div class="section-head">
+      <span class="eyebrow">At a glance</span>
+      <h2 id="g-h">How graduates and students are doing</h2>
+    </div>
+    <div class="gauges" id="gauges"></div>
+  </section>
+
+  <section class="reveal" data-anim="chart" aria-labelledby="e-h">
+    <div class="section-head">
+      <span class="eyebrow">Earnings</span>
+      <h2 id="e-h" class="ehead"></h2>
+      <p>Each dot is the median salary; the line shows the typical range. Compared with all full-time computer science graduates in the UK.</p>
+    </div>
+    <div class="card chart-card">
+      <div class="legend"><span><i class="dot" style="background:var(--plasma)"></i><span id="lg-a"></span></span><span><i class="dot" style="background:var(--cool)"></i><span id="lg-b"></span></span></div>
+      <div class="chart" id="chart"></div>
+      <p class="chart-note" id="chart-note"></p>
+    </div>
+  </section>
+
+  <section class="reveal" data-anim="meters" aria-labelledby="j-h">
+    <div class="section-head">
+      <span class="eyebrow">Jobs</span>
+      <h2 id="j-h">What graduates in work are doing</h2>
+    </div>
+    <div class="split">
+      <div class="card">
+        <h3>Type of work</h3>
+        <div class="stack" id="stack" role="img" aria-label="Share of graduates in highly skilled, other and unknown work"></div>
+        <div class="stack-key" id="stack-key"></div>
+      </div>
+      <div class="card">
+        <h3>Most common job groups</h3>
+        <div class="meters" id="roles"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="reveal" data-anim="meters" aria-labelledby="v-h">
+    <div class="section-head">
+      <span class="eyebrow">Student voice</span>
+      <h2 id="v-h">What final-year students and graduates say</h2>
+      <p id="nss-cap"></p>
+    </div>
+    <div class="card"><div class="meters" id="nss"></div><div class="hint">tap any bar to replay</div></div>
+    <div class="perc" id="perc"></div>
+  </section>
+
+  <section class="reveal" aria-labelledby="s-h">
+    <div class="section-head">
+      <span class="eyebrow">What this means</span>
+      <h2 id="s-h">The short version</h2>
+    </div>
+    <div class="summary" id="summary"></div>
+  </section>
+
+  <footer class="sources reveal">
+    <div class="brand">OrbitEd</div>
+    <p id="src"></p>
+    <p>Figures cover all graduates of this course or subject, not only international students. Earnings after 3 and 5 years come from tax records for graduates working in the UK. Job and outcome figures cover computer science at this university across related courses.</p>
+  </footer>
+</div>
+
+<script>
+/* ===== Edit this block for each student. Everything on the page is drawn from it. ===== */
+const SNAPSHOT = {
+  preparedFor: "Nas",
+  course: "Computer Science (Artificial Intelligence)",
+  award: "BSc (Hons)",
+  university: "University of Greenwich",
+  tags: [["Length","3 years + optional placement"],["Accredited","BCS, the Chartered Institute for IT"],["Mode","Full-time"]],
+  headline: {value:78, caption:"of graduates are working or studying", sub:"Based on 115 graduates (2023–24), 53% of those asked"},
+  gauges: [
+    {value:78, label:"In work or further study", note:"15 months after graduating · 115 graduates"},
+    {value:60, label:"In highly skilled work", note:"Of graduates in work · 80 graduates"},
+    {value:77, label:"Still on course or completed", note:"Continuation · 65 students who started 2023–24"}
+  ],
+  earnings: {
+    title: "£28,000 median salary 15 months after graduating",
+    a: "Computer science at Greenwich", b: "All UK computer science",
+    points: [
+      {when:"15 months", a:[28000,25000,35000], b:[33000,28000,40000], note:"2023–24 graduates"},
+      {when:"3 years",   a:[27000,21000,34500], b:[29500,22000,39500], note:"2016–18 graduates"},
+      {when:"5 years",   a:[34000,26000,44000], b:[37000,26500,53500], note:"2016–18 graduates"}
+    ],
+    note: "15-month figures: Graduate Outcomes survey, 35 Greenwich graduates and 6,270 UK-wide. 3- and 5-year figures: tax records for about 300 Greenwich graduates and 11,000+ UK-wide. The groups differ, so read each point on its own, not as one person's career."
+  },
+  work: [
+    {label:"Highly skilled work", value:60, color:"var(--plasma)"},
+    {label:"Other work", value:33, color:"var(--cool)"},
+    {label:"Unknown", value:6, color:"#55555F"}
+  ],
+  roles: [
+    {label:"IT professionals", value:25},
+    {label:"Science, engineering and technology associate professionals", value:15},
+    {label:"Elementary occupations", value:14},
+    {label:"Business and public service associate professionals", value:9},
+    {label:"Sales occupations", value:8}
+  ],
+  nssCaption: "National Student Survey: 25 final-year students answered, 61% of those asked. Overall satisfaction is not published for courses in England.",
+  nss: [["Learning resources",90],["Organisation",89],["Learning opportunities",83],["Assessment and feedback",82],["Teaching",80],["Academic support",76],["Student voice",70]],
+  perceptions: [[80,"find their current work meaningful"],[55,"say their work fits their future plans"],[40,"use what they learnt in their work"]],
+  summary: [
+    "Most graduates are working or studying 15 months on (78%), and 6 in 10 of those working are in highly skilled jobs, most often as IT professionals.",
+    "Salaries trail the UK computer science average: a £28,000 median at 15 months against £33,000 nationally, and £34,000 against £37,000 after five years.",
+    "Students rate resources and organisation highly (around 90%), but only 70% feel the course is building the skills they will need for the future."
+  ],
+  questions: [
+    "Does the placement year improve job outcomes for this course?",
+    "How do international graduates of this course find work in the UK?"
+  ],
+  sources: "Source: Discover Uni, official UK course data, checked 30 October 2026."
+};
+/* ===================================================================================== */
+
+const $ = id => document.getElementById(id);
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const gbp = n => '£' + (n % 1000 ? (n/1000).toFixed(1) : n/1000) + 'k';
+const raf2 = fn => requestAnimationFrame(() => requestAnimationFrame(fn));
+
+function countTo(el, to, suffix, dur){
+  if (reduce){ el.textContent = to + suffix; return; }
+  const t0 = performance.now();
+  const step = t => { const k = Math.min(1,(t-t0)/dur), e = 1-Math.pow(1-k,3); el.textContent = Math.round(to*e) + suffix; if (k<1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+
+/* ---------- builders ---------- */
+const C = 2*Math.PI*54;
+function buildGauge(g, i){
+  const d = document.createElement('div'); d.className = 'gauge'; d.tabIndex = 0;
+  d.setAttribute('aria-label', `${g.value}% ${g.label}. Press to replay the animation.`);
+  d.innerHTML = `<svg viewBox="0 0 150 150" aria-hidden="true"><defs><linearGradient id="gg${i}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF9A4D"/><stop offset="1" stop-color="#FF5E00"/></linearGradient></defs><circle class="halo" cx="75" cy="75" r="68" fill="none" stroke-width="1.5"/><circle class="track" cx="75" cy="75" r="54" fill="none" stroke-width="10"/><circle class="arc" cx="75" cy="75" r="54" fill="none" stroke-width="10" stroke="url(#gg${i})" transform="rotate(-90 75 75)" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-g.value/100)}"/><g class="sat-g" style="transform:rotate(${3.6*g.value}deg)"><circle class="sat-pulse" cx="75" cy="21" r="5" stroke-width="1.5"/><circle class="sat" cx="75" cy="21" r="5"/></g><text class="val" x="75" y="85" text-anchor="middle">${g.value}%</text></svg><div class="label"></div><div class="note"></div><div class="hint">tap to replay</div>`;
+  d.querySelector('.label').textContent = g.label; d.querySelector('.note').textContent = g.note;
+  d._v = g.value;
+  return d;
+}
+function buildMeter(label, value, max, alt){
+  const m = document.createElement('div'); m.className = 'meter' + (alt ? ' alt' : ''); m.tabIndex = 0;
+  m.setAttribute('aria-label', `${label}: ${value}%. Press to replay the animation.`);
+  m.innerHTML = `<div class="row"><span></span><b class="pct">${value}%</b></div><div class="track"><i class="fill" style="width:${value/max*100}%"></i><span class="sat" style="left:${value/max*100}%"></span></div>`;
+  m.querySelector('span').textContent = label;
+  m._v = value; m._w = value/max*100;
+  return m;
+}
+
+/* ---------- reset / play (shared by scroll, load and replay) ---------- */
+function resetGauge(d){ const arc = d.querySelector('.arc'), sat = d.querySelector('.sat-g');
+  d.classList.remove('done'); [arc,sat].forEach(el => el.style.transition = 'none');
+  arc.setAttribute('stroke-dashoffset', C); sat.style.transform = 'rotate(0deg)'; d.querySelector('.val').textContent = '0%'; }
+function playGauge(d, delay){ const arc = d.querySelector('.arc'), sat = d.querySelector('.sat-g');
+  raf2(() => { [arc,sat].forEach(el => { el.style.transition = ''; el.style.transitionDelay = delay+'s'; });
+    arc.setAttribute('stroke-dashoffset', C*(1-d._v/100)); sat.style.transform = `rotate(${3.6*d._v}deg)`;
+    setTimeout(() => { countTo(d.querySelector('.val'), d._v, '%', 1600); setTimeout(() => d.classList.add('done'), 1600); }, delay*1000); }); }
+function resetMeter(m){ const f = m.querySelector('.fill'), s = m.querySelector('.sat');
+  m.classList.remove('done'); [f,s].forEach(el => el.style.transition = 'none'); f.style.width = '0%'; s.style.left = '0%'; m.querySelector('.pct').textContent = '0%'; }
+function playMeter(m, delay){ const f = m.querySelector('.fill'), s = m.querySelector('.sat');
+  raf2(() => { [f,s].forEach(el => { el.style.transition = ''; el.style.transitionDelay = delay+'s'; });
+    f.style.width = m._w+'%'; s.style.left = m._w+'%';
+    setTimeout(() => { countTo(m.querySelector('.pct'), m._v, '%', 1600); setTimeout(() => m.classList.add('done'), 1600); }, delay*1000); }); }
+function resetStack(st){ st.querySelectorAll('i').forEach(i => { i.style.transition='none'; i.style.width='0'; }); }
+function playStack(st){ raf2(() => st.querySelectorAll('i').forEach(i => { i.style.transition=''; i.style.width = i.dataset.w+'%'; })); }
+function resetChart(ch){ ch.classList.remove('done'); ch.querySelectorAll('.pt').forEach(g => { g.style.transition='none'; g.style.opacity='.1'; g.style.transform='translateY(22px)'; });
+  ch.querySelectorAll('.whisker').forEach(w => { w.style.transition='none'; w.style.strokeDashoffset = w.dataset.len; }); }
+function playChart(ch){ raf2(() => { ch.querySelectorAll('.pt').forEach((g,i) => { g.style.transition=''; g.style.transitionDelay = (0.1+i*0.1)+'s'; g.style.opacity='1'; g.style.transform='none'; });
+  ch.querySelectorAll('.whisker').forEach((w,i) => { w.style.transition=''; w.style.transitionDelay = (0.3+i*0.1)+'s'; w.style.strokeDashoffset = 0; });
+  setTimeout(() => ch.classList.add('done'), 1800); }); }
+
+function resetSection(sec){
+  sec.querySelectorAll('.gauge').forEach(resetGauge);
+  sec.querySelectorAll('.meter').forEach(resetMeter);
+  sec.querySelectorAll('.stack').forEach(resetStack);
+  sec.querySelectorAll('.chart').forEach(resetChart);
+}
+function playSection(sec){
+  sec.querySelectorAll('.gauge').forEach((d,i) => playGauge(d, i*0.2));
+  sec.querySelectorAll('.meters').forEach(group => group.querySelectorAll('.meter').forEach((m,i) => playMeter(m, i*0.08)));
+  sec.querySelectorAll('.stack').forEach(playStack);
+  sec.querySelectorAll('.chart').forEach(playChart);
+}
+function wireReplay(el, reset, play){
+  let last = 0; const go = force => { const now = Date.now(); if (force || now-last > 1200){ last = now; reset(el); play(el, 0); } };
+  el.addEventListener('mouseenter', () => go(false)); el.addEventListener('click', () => go(true));
+  el.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); go(true); } });
+}
+
+/* earnings chart, drawn to the width it has: wide screens put salary labels beside each dot,
+   phones put the Greenwich label under its range and the UK label above its range so nothing collides */
+function drawChart(e){
+  const box = $('chart'), narrow = box.clientWidth < 560;
+  const all = e.points.flatMap(p => [...p.a, ...p.b]);
+  const lo = Math.floor(Math.min(...all)/10000)*10000, hi = Math.ceil(Math.max(...all)/10000)*10000;
+  const W = narrow ? Math.max(300, box.clientWidth) : 640, H = narrow ? 360 : 320;
+  const L = narrow ? 44 : 64, R = narrow ? 8 : 20, T = narrow ? 30 : 20, B = narrow ? 80 : 56;
+  const Y = v => T + (hi - v)/(hi - lo)*(H - T - B), band = (W - L - R)/e.points.length, off = narrow ? Math.min(18, band*0.2) : 22;
+  const fs = narrow ? 13 : 12;
+  let svg = `<svg viewBox="0 0 ${W} ${H}" style="min-width:0" role="img" aria-label="Median salary and typical range at 15 months, 3 years and 5 years"><defs><filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`;
+  for (let v = lo; v <= hi; v += 10000) svg += `<line class="grid" x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}"/><text class="axis" x="${L-8}" y="${Y(v)+4}" text-anchor="end" font-size="${fs}">${gbp(v)}</text>`;
+  e.points.forEach((p,i) => {
+    const cx = L + band*i + band/2;
+    [['a',-off,'#FF5E00'],['b',off,'#C8C8D2']].forEach(([k,dx,col]) => {
+      const [m,l,h] = p[k], x = cx+dx, len = Y(l)-Y(h);
+      const lab = narrow
+        ? (k==='a' ? `<text x="${x}" y="${Y(l)+18}" text-anchor="middle" fill="#FF8A3D" font-weight="600" font-size="${fs}">${gbp(m)}</text>` : `<text x="${x}" y="${Y(h)-10}" text-anchor="middle" fill="#F2F2F5" font-weight="600" font-size="${fs}">${gbp(m)}</text>`)
+        : `<text x="${x + (dx<0?-12:12)}" y="${Y(m)+4}" text-anchor="${dx<0?'end':'start'}" fill="#F2F2F5" font-weight="600">${gbp(m)}</text>`;
+      svg += `<g class="pt"><line class="whisker" x1="${x}" x2="${x}" y1="${Y(h)}" y2="${Y(l)}" stroke="${col}" stroke-opacity=".6" stroke-width="2" stroke-linecap="round" stroke-dasharray="${len}" data-len="${len}"/><line x1="${x-6}" x2="${x+6}" y1="${Y(l)}" y2="${Y(l)}" stroke="${col}" stroke-opacity=".6" stroke-width="2"/><line x1="${x-6}" x2="${x+6}" y1="${Y(h)}" y2="${Y(h)}" stroke="${col}" stroke-opacity=".6" stroke-width="2"/>${k==='a'?`<circle class="ring" cx="${x}" cy="${Y(m)}" r="7" stroke-width="1.5"/>`:''}<circle cx="${x}" cy="${Y(m)}" r="${narrow?6:7}" fill="${col}" ${k==='a'?'filter="url(#glow)"':''}/>${lab}</g>`;
+    });
+    svg += `<text x="${cx}" y="${H-(narrow?40:30)}" text-anchor="middle" fill="#F2F2F5" font-size="${fs}">${p.when}</text><text class="axis" x="${cx}" y="${H-(narrow?22:12)}" text-anchor="middle" font-size="${narrow?11:12}">${narrow ? p.note.replace(' graduates','') : p.note}</text>`;
+  });
+  box.innerHTML = svg + '</svg>';
+}
+
+/* ---------- render ---------- */
+function render(s){
+  $('who').textContent = s.preparedFor; $('course').textContent = s.course; $('uni').textContent = s.award + ' · ' + s.university;
+  s.tags.forEach(([k,v]) => { const t = document.createElement('span'); t.className='tag'; t.innerHTML = k + ' <b></b>'; t.querySelector('b').textContent = v; $('tags').appendChild(t); });
+  $('hl-num').textContent = s.headline.value + '%'; $('hl-cap').textContent = s.headline.caption; $('hl-sub').textContent = s.headline.sub;
+
+  s.gauges.forEach((g,i) => { const d = buildGauge(g,i); $('gauges').appendChild(d); wireReplay(d, resetGauge, playGauge); });
+
+  // earnings chart
+  const e = s.earnings; document.querySelector('.ehead').textContent = e.title;
+  $('lg-a').textContent = e.a; $('lg-b').textContent = e.b; $('chart-note').textContent = e.note;
+  drawChart(e);
+  let lastW = $('chart').clientWidth;
+  addEventListener('resize', () => { const w = $('chart').clientWidth; if (Math.abs(w - lastW) > 40){ lastW = w; drawChart(e); $('chart').classList.add('done'); } });
+  wireReplay($('chart'), resetChart, el => playChart(el));
+
+  // jobs
+  s.work.forEach(w => { const i = document.createElement('i'); i.style.background = w.color; i.style.width = w.value + '%'; i.dataset.w = w.value; $('stack').appendChild(i);
+    const k = document.createElement('div'); k.innerHTML = `<span><i class="dot" style="background:${w.color}"></i> <span></span></span><b class="mono">${w.value}%</b>`; k.querySelector('span span').textContent = w.label; $('stack-key').appendChild(k); });
+  const top = Math.max(...s.roles.map(r => r.value));
+  s.roles.forEach(r => { const m = buildMeter(r.label, r.value, top, false); $('roles').appendChild(m); wireReplay(m, resetMeter, playMeter); });
+
+  // voice
+  $('nss-cap').textContent = s.nssCaption;
+  s.nss.forEach(([k,v]) => { const m = buildMeter(k, v, 100, false); $('nss').appendChild(m); wireReplay(m, resetMeter, playMeter); });
+  s.perceptions.forEach(([v,t]) => { const d = document.createElement('div'); d.innerHTML = `<b class="mono">${v}%</b><span></span>`; d.querySelector('span').textContent = 'of graduates ' + t; $('perc').appendChild(d); });
+
+  // summary
+  s.summary.forEach(t => { const p = document.createElement('p'); p.textContent = t; $('summary').appendChild(p); });
+  const h = document.createElement('div'); h.innerHTML = '<span class="eyebrow">Good questions to ask the university</span><ul style="margin:8px 0 0;padding-left:20px"></ul>';
+  s.questions.forEach(q => { const li = document.createElement('li'); li.textContent = q; h.querySelector('ul').appendChild(li); });
+  $('summary').appendChild(h);
+  $('src').textContent = s.sources;
+}
+render(SNAPSHOT);
+countTo($('hl-num'), SNAPSHOT.headline.value, '%', 1400);
+
+/* ---------- scroll choreography ----------
+   Sections fade, lift and sharpen continuously as you scroll, with a little easing so the motion feels
+   like a smooth loader; their cards follow one after another. Gauges and bars play once a section is in view.
+   A glowing bar along the top fills as you move down the page. */
+(function(){
+  const secs = [...document.querySelectorAll('.reveal')];
+  secs.forEach(sec => sec.querySelectorAll('.gauge, .split > .card, .perc > div, .summary > *').forEach((el,i) => { el.dataset.i = i; el.style.setProperty('--i', i); }));
+  const pbar = $('pbar'), pdot = $('pdot'), ppct = $('ppct');
+  const clamp = v => Math.max(0, Math.min(1, v));
+  const target = new Map(), cur = new Map();
+  let pTarget = 0, pCur = 0, running = false;
+
+  function measure(){
+    const vh = innerHeight;
+    secs.forEach(sec => { const top = sec.getBoundingClientRect().top; target.set(sec, clamp((vh*1.02 - top)/(vh*0.38))); });
+    const max = document.documentElement.scrollHeight - vh;
+    pTarget = max > 0 ? clamp(scrollY / max) : 1;
+  }
+  function frame(){
+    let moving = false;
+    secs.forEach(sec => {
+      const t = target.get(sec), c = cur.has(sec) ? cur.get(sec) : t;
+      const n = Math.abs(t - c) < 0.002 ? t : c + (t - c)*0.14;
+      if (n !== t) moving = true;
+      cur.set(sec, n); sec.style.setProperty('--p', n.toFixed(4));
+    });
+    pCur = Math.abs(pTarget - pCur) < 0.0005 ? pTarget : pCur + (pTarget - pCur)*0.18;
+    if (pCur !== pTarget) moving = true;
+    const pct = (pCur*100).toFixed(2) + '%';
+    pbar.style.width = pct; pdot.style.left = pct; ppct.textContent = Math.round(pCur*100) + '%';
+    if (moving) requestAnimationFrame(frame); else running = false;
+  }
+  const kick = () => { measure(); if (!running){ running = true; requestAnimationFrame(frame); } };
+
+  if (reduce){ secs.forEach(sec => sec.style.setProperty('--p', 1)); addEventListener('scroll', () => { measure(); pCur = pTarget; frame(); }, {passive:true}); measure(); pCur = pTarget; frame(); return; }
+
+  // start state: in-view sections at full, the rest set by their position
+  measure(); secs.forEach(sec => cur.set(sec, target.get(sec)));
+  addEventListener('scroll', kick, {passive:true}); addEventListener('resize', kick); kick();
+
+  // play gauges, bars and the chart once each section is in view
+  if (!('IntersectionObserver' in window)) return;
+  const played = new WeakSet();
+  secs.forEach(sec => { if (sec.getBoundingClientRect().top < innerHeight*0.85){ resetSection(sec); playSection(sec); played.add(sec); } else resetSection(sec); });
+  const show = new IntersectionObserver(entries => entries.forEach(en => {
+    if (en.isIntersecting && !played.has(en.target)){ played.add(en.target); playSection(en.target); }
+  }), {threshold:0.25});
+  secs.forEach(sec => { if (!played.has(sec)) show.observe(sec); });
+})();
+
+/* ---------- ambient orbit behind the hero ---------- */
+(function(){
+  const cv = $('orbit'), ctx = cv.getContext('2d');
+  const sats = [{r:.30,s:.00018,a:0.4},{r:.42,s:-.00012,a:2.1},{r:.56,s:.00008,a:4.0}];
+  function size(){ const b = cv.getBoundingClientRect(), d = devicePixelRatio||1; cv.width = b.width*d; cv.height = b.height*d; ctx.setTransform(d,0,0,d,0,0); }
+  function draw(t){
+    const w = cv.clientWidth, h = cv.clientHeight, cx = w*0.78, cy = h*0.5, base = Math.max(w,h);
+    ctx.clearRect(0,0,w,h);
+    sats.forEach((o,i) => {
+      const rx = base*o.r, ry = rx*0.38, c = Math.cos(-0.25), sn = Math.sin(-0.25);
+      ctx.beginPath(); ctx.ellipse(cx,cy,rx,ry,-0.25,0,Math.PI*2); ctx.strokeStyle = 'rgba(255,94,0,0.12)'; ctx.lineWidth = 1; ctx.stroke();
+      const ang = o.a + (reduce ? 0 : t*o.s), px = Math.cos(ang)*rx, py = Math.sin(ang)*ry;
+      const x = cx + px*c - py*sn, y = cy + px*sn + py*c;
+      ctx.shadowColor = 'rgba(255,94,0,0.9)'; ctx.shadowBlur = i===0 ? 14 : 6;
+      ctx.beginPath(); ctx.arc(x,y,i===0?4:2.5,0,Math.PI*2); ctx.fillStyle = i===0 ? '#FF5E00' : 'rgba(200,200,210,0.7)'; ctx.fill();
+      ctx.shadowBlur = 0;
+    });
+    if (!reduce) requestAnimationFrame(draw);
+  }
+  size(); addEventListener('resize', size); requestAnimationFrame(draw);
+})();
+</script>
+</body>
+</html>
